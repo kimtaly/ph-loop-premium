@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Premium Activated</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCeZPkRofbTyBxkIDhlpOjOW9F0ogznsTE",
+      authDomain: "ph-db-ba3ab.firebaseapp.com",
+      projectId: "ph-db-ba3ab",
+      storageBucket: "ph-db-ba3ab.appspot.com",
+      messagingSenderId: "845925115232",
+      appId: "1:845925115232:web:bd331c2a9d08313a8d2a05",
+      measurementId: "G-C9X4DNSTTV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // ✅ UID 기반으로 premium 저장
+        const ref = doc(db, "users", user.uid);
+        await setDoc(ref, { premium: true }, { merge: true });
+
+        // ✅ 확장 프로그램에도 프리미엄 메시지 전달
+        chrome.runtime.sendMessage({ type: "activatePremium" });
+
+        document.body.innerHTML = `
+          <h2>✅ Premium activated</h2>
+          <p>You can now return to the extension and use all features.</p>
+        `;
+      } else {
+        document.body.innerHTML = `<p>Please sign in with Google to complete your premium upgrade.</p>`;
+      }
+    });
+  </script>
+</head>
+<body>
+  <p>Verifying your purchase...</p>
+</body>
+</html>
